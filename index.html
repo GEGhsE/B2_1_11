@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>헷갈리기 쉬운 낱말 탐구</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════
+   기반: 태블릿(1024×768) 기준 vw/vh 100% 활용
+   모든 크기를 vw·vh·vmin 단위로 → 스크롤 없음
+══════════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  width:100vw;height:100vh;overflow:hidden;
+  font-family:'Jua',sans-serif;
+  background:#FAF7F2;
+  background-image:radial-gradient(#E5E7EB 1.5px,transparent 1.5px);
+  background-size:2.5vmin 2.5vmin;
+  -webkit-user-select:none;user-select:none;
+}
+
+/* ── 화면 단위 ── */
+.screen{
+  display:none;width:100vw;height:100vh;
+  flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.screen.active{display:flex}
+
+/* ── 공통 ── */
+button{font-family:'Jua',sans-serif;cursor:pointer;border:none;transition:transform .15s}
+button:active{transform:scale(.95)}
+select{font-family:'Jua',sans-serif}
+
+/* ── 상단바 ── */
+.topbar{
+  width:100%;flex-shrink:0;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(8px);
+  padding:1vh 2vw;
+  display:flex;align-items:center;gap:1.5vw;
+  box-shadow:0 1px 6px rgba(0,0,0,.07);
+  border-bottom:1px solid #F3F4F6;
+  height:7vh;
+}
+.topbar-icon{
+  background:#3B82F6;color:white;border-radius:1vmin;
+  width:4.5vmin;height:4.5vmin;font-size:3.5vmin;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.topbar-title{font-weight:700;color:#2D3E6B;font-size:2.8vmin}
+.topbar-tag{
+  border-radius:1vmin;padding:0.5vmin 1.5vmin;
+  font-size:2.2vmin;font-weight:700;display:inline-block;white-space:nowrap;flex-shrink:0;
+}
+.progress-bar{height:1.2vmin;background:#E5E7EB;border-radius:99px;overflow:hidden;flex:1}
+.progress-fill{height:100%;background:linear-gradient(90deg,#60A5FA,#3B82F6);border-radius:99px;transition:width .4s ease}
+
+/* ── 그리드 ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.5vmin}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2vmin}
+
+/* ── 오버레이 ── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);
+  backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  z-index:100;padding:2vmin;
+}
+.modal{
+  background:white;border-radius:3vmin;
+  padding:5vmin 6vmin;
+  width:min(98vw,140vh);
+  max-width:1500px;
+  text-align:center;
+  overflow:hidden;
+}
+
+/* ── 10칸 공책 ── */
+.ten-grid-wrap{display:flex;flex-direction:column;gap:1.2vmin;width:100%;flex:1;min-height:0;overflow:hidden;justify-content:center}
+.ten-row{
+  display:grid;
+  grid-template-columns:repeat(10,1fr);
+  gap:.6vmin;
+  background:white;padding:1.2vmin;
+  border-radius:1.5vmin;border:2px solid #FFE0CC;
+  width:100%;
+}
+.ten-cell{
+  border:2px solid #FFC0B0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:3vmin;font-weight:700;color:#2D3E6B;
+  background:#FFF9F9;border-radius:.5vmin;
+  position:relative;width:100%;
+}
+
+/* ── 이미지 박스 ── */
+.img-box{
+  background:#F9FAFB;border:2px dashed #D1D5DB;border-radius:2vmin;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;flex-direction:column;gap:.8vmin;
+}
+
+/* ── 애니메이션 ── */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.2vmin)}}
+@keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.floating{animation:float 2.5s ease-in-out infinite;display:inline-block}
+.pop{animation:pop .2s ease-out forwards}
+
+/* ── 빙고 버튼 ── */
+.bingo-btn{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.8vmin;border-radius:2vmin;border:2px solid #BFDBFE;
+  background:white;transition:transform .15s;cursor:pointer;
+  padding:1.2vmin;
+}
+.bingo-btn:hover{transform:scale(1.03)}
+.bingo-btn.done-trophy{background:#FFFBEB;border-color:#FDE68A}
+.bingo-btn.done-badge {background:#F0FDF4;border-color:#BBF7D0}
+
+/* ── 선택 버튼 ── */
+.ans-btn{
+  background:white;border:2px solid #FED7AA;
+  border-radius:2vmin;font-family:'Jua',sans-serif;font-weight:700;
+  color:#2D3E6B;cursor:pointer;transition:all .15s;
+  font-size:5.6vmin;padding:3.8vmin 1.2vmin;width:100%;
+}
+.ans-btn:hover{background:#FFF7ED}
+.ans-btn:disabled{opacity:.35;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- ① 인트로 -->
+<div id="s-intro" class="screen active">
+  <div style="width:98vw;max-width:140vh;display:flex;flex-direction:column;align-items:center;gap:3vh">
+
+    <!-- 타이틀 행: 연필요정 SVG + 제목 -->
+    <div style="display:flex;align-items:center;gap:3vmin">
+      <!-- 연필요정 원본 SVG -->
+      <div class="floating">
+        <svg width="12vmin" height="15vmin" viewBox="0 0 120 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M45 55C25 45 15 75 30 85C15 95 20 115 40 105" stroke="#A0AEC0" stroke-width="3" stroke-linecap="round" style="transform-origin:45px 55px;transform:rotate(-10deg)"/>
+          <path d="M75 55C95 45 105 75 90 85C105 95 100 115 80 105" stroke="#A0AEC0" stroke-width="3" stroke-linecap="round" style="transform-origin:75px 55px;transform:rotate(10deg)"/>
+          <path d="M45 30L75 30V110L60 135L45 110V30Z" fill="#F6AD55" stroke="#4A5568" stroke-width="2"/>
+          <path d="M55 30V110" stroke="#ED8936" stroke-width="1"/>
+          <path d="M65 30V110" stroke="#ED8936" stroke-width="1"/>
+          <path d="M45 110L60 135L75 110H45Z" fill="#FBD38D" stroke="#4A5568" stroke-width="2"/>
+          <path d="M54 125L60 135L66 125H54Z" fill="#2D3748"/>
+          <path d="M45 15C45 10 75 10 75 15V30H45V15Z" fill="#FBB6CE" stroke="#4A5568" stroke-width="2"/>
+          <rect x="45" y="25" width="30" height="5" fill="#CBD5E0" stroke="#4A5568" stroke-width="1"/>
+          <circle cx="53" cy="65" r="2" fill="#2D3748"/>
+          <circle cx="67" cy="65" r="2" fill="#2D3748"/>
+          <path d="M58 75C58 75 60 78 62 75" stroke="#2D3748" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="50" cy="70" r="3" fill="#FED7E2" opacity="0.6"/>
+          <circle cx="70" cy="70" r="3" fill="#FED7E2" opacity="0.6"/>
+        </svg>
+      </div>
+      <div>
+        <div style="background:#FFF3E8;border:2px solid #FFD0A0;border-radius:2vmin;padding:0.8vmin 2.8vmin;font-size:3.1vmin;color:#FF7000;font-weight:700;margin-bottom:1.2vmin;display:inline-block">국어 1–2학년군</div>
+        <h1 style="font-size:9.8vmin;color:#2D3E6B;line-height:1.2;white-space:nowrap">헷갈리기 쉬운 낱말 탐구</h1>
+      </div>
+    </div>
+
+    <!-- 🎯 학습목표 박스 -->
+    <div style="width:100%;background:#FFFBEB;border:3px solid #FCD34D;border-radius:3vmin;padding:3.8vmin 4.4vmin 3.1vmin;position:relative">
+      <div style="position:absolute;top:-2.6vmin;left:3vmin;background:#F59E0B;color:white;font-size:3.6vmin;font-weight:700;padding:0.9vmin 3.1vmin;border-radius:2vmin;white-space:nowrap">
+        🎯 오늘의 학습 목표
+      </div>
+      <div style="margin-top:2vmin;display:flex;flex-direction:column;gap:2.5vmin">
+        <div style="display:flex;align-items:center;gap:2vmin">
+          <span style="font-size:5.6vmin;flex-shrink:0">✅</span>
+          <span style="font-size:4.2vmin;color:#92400E;font-weight:700;white-space:nowrap">
+            헷갈리기 쉬운 낱말 쌍의 <span style="color:#D97706">뜻 차이</span>를 말로 설명할 수 있어요.
+          </span>
+        </div>
+        <div style="display:flex;align-items:center;gap:2vmin">
+          <span style="font-size:5.6vmin;flex-shrink:0">✅</span>
+          <span style="font-size:4.2vmin;color:#92400E;font-weight:700;white-space:nowrap">
+            문장을 읽고 <span style="color:#D97706">알맞은 낱말</span>을 바르게 골라 쓸 수 있어요.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <button onclick="goTo('s-login')" style="background:#FF7000;color:white;font-size:4.9vmin;padding:2.5vmin 12.5vmin;border-radius:4vmin;box-shadow:0 6px 20px rgba(255,112,0,.3)">공부 시작! 🚀</button>
+
+    <!-- 선생님 설정 버튼 (학생용 링크로 접속 시 숨김) -->
+    <div id="teacher-btn-wrap" style="margin-top:2vmin">
+      <button onclick="toggleTeacherPanel()" style="background:none;border:1.5px solid #D1D5DB;border-radius:2vmin;padding:1.2vmin 3.5vmin;font-size:2.8vmin;color:#9CA3AF">⚙️ 선생님 설정</button>
+    </div>
+
+    <!-- 선생님 설정 패널 -->
+    <div id="teacher-panel" style="display:none;width:100%;max-width:min(90vw,70vh);background:white;border:2px solid #E5E7EB;border-radius:2.5vmin;padding:3vmin;margin-top:1.5vmin;text-align:left">
+      <div style="font-size:3.2vmin;font-weight:700;color:#374151;margin-bottom:1.5vmin">📋 시트 연결 설정</div>
+      <div style="font-size:2.6vmin;color:#6B7280;margin-bottom:1.5vmin;line-height:1.6">구글 시트를 Apps Script 웹앱으로 배포한 뒤 아래에 배포 주소(…/exec)를 입력하세요.</div>
+      <input id="exec-url-input" type="url" placeholder="https://script.google.com/macros/s/.../exec"
+        style="width:100%;font-size:2.8vmin;padding:1.5vmin 2vmin;border:2px solid #D1D5DB;border-radius:1.5vmin;margin-bottom:1.5vmin;font-family:'Jua',sans-serif;outline:none">
+      <button onclick="connectSheet()" style="width:100%;background:#3B82F6;color:white;font-size:3.2vmin;padding:1.8vmin;border-radius:1.5vmin;margin-bottom:2vmin">연결하기</button>
+
+      <!-- 학생용 링크 생성 (연결 후 표시) -->
+      <div id="student-link-box" style="display:none">
+        <div style="border-top:1px solid #F3F4F6;padding-top:1.8vmin;margin-top:0.5vmin">
+          <div style="font-size:2.8vmin;font-weight:700;color:#374151;margin-bottom:1vmin">학생용 입장 주소</div>
+          <div style="font-size:2.2vmin;color:#6B7280;margin-bottom:1vmin">아래 주소를 학생들에게 공유하세요. 이 주소로 접속하면 자동으로 이 시트에 연결됩니다.</div>
+          <div id="student-link-text" style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:1vmin;padding:1.2vmin;font-size:2.2vmin;color:#374151;word-break:break-all;margin-bottom:1.2vmin;line-height:1.5"></div>
+          <button onclick="copyStudentLink()" style="background:#10B981;color:white;font-size:2.8vmin;padding:1.2vmin 3vmin;border-radius:1.2vmin">복사</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ② 로그인 -->
+<div id="s-login" class="screen">
+  <div style="background:white;border-radius:3vmin;padding:5.0vmin;width:min(80vw,60vh);text-align:center;border:3px solid #FFE0CC">
+    <div style="font-size:9.8vmin;margin-bottom:1.5vmin">👤</div>
+    <h2 style="font-size:4.2vmin;color:#2D3E6B;margin-bottom:2.5vmin">이름을 선택하세요</h2>
+    <select id="sel-name" onchange="onNameChange()" style="width:100%;font-size:3.5vmin;padding:1.5vmin 2.2vmin;border:2px solid #FED7AA;border-radius:2vmin;margin-bottom:2.5vmin;background:#FFF9F5;outline:none">
+      <option value="">-- 이름 선택 --</option>
+      <option>1 학생1</option><option>2 학생2</option><option>3 학생3</option><option>4 학생4</option><option>5 학생5</option><option>6 학생6</option><option>7 학생7</option><option>8 학생8</option><option>9 학생9</option><option>10 학생10</option><option>11 학생11</option><option>12 학생12</option><option>13 학생13</option><option>14 학생14</option><option>15 학생15</option><option>16 학생16</option><option>17 학생17</option><option>18 학생18</option><option>19 학생19</option><option>20 학생20</option><option>21 학생21</option><option>22 학생22</option><option>23 학생23</option><option>24 학생24</option><option>25 학생25</option><option>26 학생26</option><option>27 학생27</option><option>28 학생28</option><option>29 학생29</option><option>30 학생30</option>
+    </select>
+    <button id="btn-enter" onclick="doLogin()" disabled style="width:100%;background:#E5E7EB;color:#9CA3AF;font-size:3.9vmin;padding:2.2vmin;border-radius:2vmin">입장하기 ✨</button>
+  </div>
+</div>
+
+<!-- ③ 모드 선택 -->
+<div id="s-mode" class="screen">
+  <h2 id="mode-title" style="font-size:6vmin;color:#2D3E6B;margin-bottom:4vh"></h2>
+  <div class="grid2" style="width:min(90vw,85vh);gap:3vmin">
+    <button onclick="goTo('s-bingo')" style="background:white;border:3px solid #BBF7D0;border-radius:3vmin;padding:6vmin 3vmin;display:flex;flex-direction:column;align-items:center;gap:2vmin" onmouseenter="this.style.transform='scale(1.04)'" onmouseleave="this.style.transform='scale(1)'">
+      <span style="font-size:12vmin">📖</span>
+      <span style="font-size:4.5vmin;font-weight:700;color:#15803D">1단계: 익히기</span>
+      <span style="font-size:3.2vmin;color:#6B7280">그림과 문장으로 배워요</span>
+    </button>
+    <button onclick="goTo('s-s2config')" style="background:white;border:3px solid #FED7AA;border-radius:3vmin;padding:6vmin 3vmin;display:flex;flex-direction:column;align-items:center;gap:2vmin" onmouseenter="this.style.transform='scale(1.04)'" onmouseleave="this.style.transform='scale(1)'">
+      <span style="font-size:12vmin">✏️</span>
+      <span style="font-size:4.5vmin;font-weight:700;color:#C2410C">2단계: 문제풀기</span>
+      <span style="font-size:3.2vmin;color:#6B7280">알맞은 낱말을 골라요</span>
+    </button>
+  </div>
+  <button onclick="toggleMute()" id="btn-mute" style="margin-top:3vh;background:none;border:2px solid #E5E7EB;border-radius:2vmin;padding:1.5vmin 4vmin;font-size:3.2vmin;color:#6B7280">🔊 소리 끄기</button>
+</div>
+
+<!-- ④ 빙고판 -->
+<div id="s-bingo" class="screen" style="padding:0">
+  <div class="topbar">
+    <button onclick="goTo('s-mode')" class="topbar-icon">🏠</button>
+    <span class="topbar-title" style="font-size:3.9vmin">낱말 탐구 빙고판</span>
+    <div class="progress-bar"><div id="bingo-progress" class="progress-fill" style="width:0%"></div></div>
+    <span id="bingo-count-tag" class="topbar-tag" style="background:#FFF3E8;color:#FF7000;border:1px solid #FED7AA;font-size:3.4vmin">빙고 0줄!</span>
+  </div>
+  <div style="display:flex;gap:1.2vmin;padding:1.5vmin;width:100%;height:93vh;overflow:hidden">
+    <div style="flex:3;display:flex;flex-direction:column;gap:1.2vmin;min-height:0">
+      <!-- 연필요정 메달/트로피 설명 (빙고판 위) -->
+      <div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:2vmin;padding:1.2vmin 2vmin;display:flex;align-items:center;gap:2vmin;flex-shrink:0">
+        <!-- 작은 연필요정 -->
+        <div class="floating" style="flex-shrink:0">
+          <svg width="9vmin" height="11vmin" viewBox="0 0 120 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M45 55C25 45 15 75 30 85C15 95 20 115 40 105" stroke="#A0AEC0" stroke-width="3" stroke-linecap="round" style="transform-origin:45px 55px;transform:rotate(-10deg)"/>
+            <path d="M75 55C95 45 105 75 90 85C105 95 100 115 80 105" stroke="#A0AEC0" stroke-width="3" stroke-linecap="round" style="transform-origin:75px 55px;transform:rotate(10deg)"/>
+            <path d="M45 30L75 30V110L60 135L45 110V30Z" fill="#F6AD55" stroke="#4A5568" stroke-width="2"/>
+            <path d="M55 30V110" stroke="#ED8936" stroke-width="1"/>
+            <path d="M65 30V110" stroke="#ED8936" stroke-width="1"/>
+            <path d="M45 110L60 135L75 110H45Z" fill="#FBD38D" stroke="#4A5568" stroke-width="2"/>
+            <path d="M54 125L60 135L66 125H54Z" fill="#2D3748"/>
+            <path d="M45 15C45 10 75 10 75 15V30H45V15Z" fill="#FBB6CE" stroke="#4A5568" stroke-width="2"/>
+            <rect x="45" y="25" width="30" height="5" fill="#CBD5E0" stroke="#4A5568" stroke-width="1"/>
+            <circle cx="53" cy="65" r="2" fill="#2D3748"/>
+            <circle cx="67" cy="65" r="2" fill="#2D3748"/>
+            <path d="M58 75C58 75 60 78 62 75" stroke="#2D3748" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="50" cy="70" r="3" fill="#FED7E2" opacity="0.6"/>
+            <circle cx="70" cy="70" r="3" fill="#FED7E2" opacity="0.6"/>
+          </svg>
+        </div>
+        <!-- 말풍선 -->
+        <div style="flex:1;background:white;border:2px solid #FDE68A;border-radius:1.5vmin;padding:1.5vmin 2vmin">
+          <div style="font-size:3.4vmin;color:#92400E;line-height:1.6;word-break:keep-all">
+            <div style="margin-bottom:0.6vmin">낱말을 모두 맞히면 <span style="background:#FEF3C7;color:#15803D;padding:0 .8vmin;border-radius:.6vmin;font-weight:700">🏅 기본 뱃지</span>를 받아요!</div>
+            <div>더 어려운 예시까지 맞히면 <span style="background:#FEF3C7;color:#B45309;padding:0 .8vmin;border-radius:.6vmin;font-weight:700">🏆 심화 마스터 트로피</span>를 받아요!</div>
+          </div>
+        </div>
+      </div>
+      <!-- 빙고판 그리드 -->
+      <div id="bingo-grid" style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:1.2vmin;min-height:0"></div>
+    </div>
+    <!-- 보너스 영역 -->
+    <div style="flex:1;min-width:15vmin;display:flex;flex-direction:column">
+      <div style="background:#FFF7ED;border:2px solid #FED7AA;border-radius:2vmin;padding:1.9vmin;flex:1;display:flex;flex-direction:column;gap:1.2vmin;overflow:hidden">
+        <div style="font-size:3.9vmin;font-weight:700;color:#C2410C;text-align:center">🌟 보너스 단어</div>
+        <div style="font-size:2.8vmin;color:#EA580C;background:#FED7AA;border-radius:1vmin;padding:0.6vmin 1.2vmin;text-align:center">빙고 1줄당 1개 오픈!</div>
+        <div id="bonus-list" style="display:flex;flex-direction:column;gap:1.2vmin;flex:1;overflow:hidden"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ 1단계 문제 -->
+<div id="s-review" class="screen" style="padding:0">
+  <div class="topbar">
+    <button onclick="goTo('s-bingo')" class="topbar-icon">🏠</button>
+    <span id="rv-substep-tag" class="topbar-tag" style="background:#DBEAFE;color:#1D4ED8">① 그림 맞히기</span>
+    <span id="rv-pair-title" style="font-weight:700;color:#2D3E6B;font-size:3.9vmin;flex:1;text-align:center"></span>
+    <span id="rv-counter" style="font-size:2.8vmin;color:#9CA3AF;white-space:nowrap"></span>
+  </div>
+  <!-- flex:1 + justify-content:center 로 수직 정중앙 -->
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5vmin 3.8vmin;gap:2.5vmin;width:100%;height:93vh;overflow:hidden">
+    <!-- 문장 박스 (문장 완성하기 단계) -->
+    <div id="rv-sentence-box" style="display:none;background:#EFF6FF;border:2px solid #BFDBFE;border-radius:2.5vmin;padding:3.8vmin 5.0vmin;width:100%;text-align:center;font-size:7.0vmin;color:#1E3A8A;line-height:1.8;flex-shrink:0"></div>
+    <!-- 그림 박스 (그림 맞히기 단계) -->
+    <div id="rv-img-box" class="img-box" style="width:100%;flex:1;min-height:0;max-height:65vh">
+      <div style="font-size:7.0vmin;color:#D1D5DB">🖼️</div>
+      <div style="font-size:2.5vmin;color:#F97316;background:#FFF7ED;border-radius:1vmin;padding:0.6vmin 1.9vmin;border:1px solid #FED7AA">실제 앱에서 그림이 표시됩니다</div>
+    </div>
+    <!-- 선택 버튼 -->
+    <div class="grid2" style="width:100%;gap:2vmin;flex-shrink:0">
+      <button id="rv-btn1" class="ans-btn" onclick="checkRv(0)"></button>
+      <button id="rv-btn2" class="ans-btn" onclick="checkRv(1)"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ⑥ 2단계 설정 -->
+<div id="s-s2config" class="screen">
+  <div style="background:white;border-radius:3vmin;padding:5vmin;width:min(90vw,80vh);text-align:center;border:3px solid #FFE0CC">
+    <div style="font-size:8.4vmin;margin-bottom:1.5vmin">✏️</div>
+    <h2 style="font-size:4.2vmin;color:#2D3E6B;margin-bottom:3vmin">몇 문제를 풀어볼까요?</h2>
+    <div class="grid3" style="margin-bottom:2.5vmin;gap:2vmin">
+      <button class="prob-btn" onclick="setProbCount(3)" style="padding:3vmin;font-size:4.5vmin;border-radius:2vmin;border:2px solid #FED7AA;background:#FF7000;color:white;white-space:nowrap">3문항</button>
+      <button class="prob-btn" onclick="setProbCount(5)" style="padding:3vmin;font-size:4.5vmin;border-radius:2vmin;border:2px solid #FED7AA;background:#FFF7ED;color:#FF7000;white-space:nowrap">5문항</button>
+      <button class="prob-btn" onclick="setProbCount(10)" style="padding:3vmin;font-size:4.5vmin;border-radius:2vmin;border:2px solid #FED7AA;background:#FFF7ED;color:#FF7000;white-space:nowrap">10문항</button>
+    </div>
+    <button onclick="initS2()" style="width:100%;background:#22C55E;color:white;font-size:4vmin;padding:2.8vmin;border-radius:2vmin;margin-bottom:1.5vmin;white-space:nowrap">도전하기! 🎯</button>
+    <button onclick="goTo('s-mode')" style="width:100%;background:#F3F4F6;color:#6B7280;font-size:3.5vmin;padding:2.2vmin;border-radius:2vmin;white-space:nowrap">돌아가기</button>
+  </div>
+</div>
+
+<!-- ⑦ 2단계 문제 -->
+<div id="s-s2quiz" class="screen" style="padding:0">
+  <div class="topbar">
+    <button onclick="goTo('s-mode')" class="topbar-icon">🏠</button>
+    <span id="s2-counter-tag" class="topbar-tag" style="background:#FFF7ED;color:#EA580C;font-size:2.8vmin">문제 1/3</span>
+    <span id="s2-retry-tag" class="topbar-tag" style="background:#FEE2E2;color:#DC2626;display:none;font-size:2.8vmin">다시 풀기 🔥</span>
+    <span id="s2-rethink-tag" class="topbar-tag" style="background:#DBEAFE;color:#1D4ED8;display:none;font-size:2.8vmin">🤔 그림 보고 다시!</span>
+    <span id="s2-pair-title" style="font-weight:700;color:#2D3E6B;font-size:3.9vmin;flex:1;text-align:center"></span>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;padding:2vmin 3vmin;gap:2vmin;width:100%;height:93vh;overflow:hidden">
+    <!-- 메인 영역: 그림(좌) + 문장(우) -->
+    <div id="s2-main" style="flex:1;display:flex;gap:2vmin;width:100%;min-height:0">
+      <!-- 그림 박스 (힌트 표시 시에만 보임) -->
+      <div id="s2-hint-box" class="img-box" style="display:none;flex:1;height:100%;min-width:0">
+        <div style="font-size:5.6vmin;color:#D1D5DB">🖼️</div>
+      </div>
+      <!-- 문장 박스 -->
+      <div id="s2-sentence-box" style="flex:1.3;background:#FFF7ED;border:2px solid #FED7AA;border-radius:2.5vmin;padding:3vmin 4vmin;height:100%;min-width:0;display:flex;align-items:center;justify-content:center;text-align:center">
+        <p id="s2-sentence" style="font-size:7vmin;color:#2D3E6B;line-height:1.8;word-break:keep-all"></p>
+      </div>
+    </div>
+    <!-- 선택 버튼 -->
+    <div class="grid2" style="width:100%;gap:2vmin;flex-shrink:0">
+      <button id="s2-btn1" class="ans-btn" onclick="checkS2(0)"></button>
+      <button id="s2-btn2" class="ans-btn" onclick="checkS2(1)"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ⑧ 2단계 결과 -->
+<div id="s-s2result" class="screen" style="padding:0">
+  <div style="flex:1;padding:3vmin 5vmin;width:100%;display:flex;flex-direction:column;align-items:center;gap:2vmin;height:100vh;overflow-y:auto">
+    <!-- 트로피 -->
+    <div style="font-size:11vmin;margin-top:1vmin">🏆</div>
+    <!-- 제목 -->
+    <h1 id="result-title" style="font-size:6.5vmin;color:#FF7000;font-weight:700;margin:0;text-align:center;word-break:keep-all"></h1>
+
+    <!-- 정보 카드 3개 -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2vmin;width:100%;max-width:140vh">
+      <div style="background:#EFF6FF;border-radius:2vmin;padding:2.5vmin 2vmin;text-align:center">
+        <div style="font-size:2.6vmin;color:#6B7280;margin-bottom:0.8vmin">학습자 성명</div>
+        <div id="result-name" style="font-size:4.5vmin;color:#1D4ED8;font-weight:700"></div>
+      </div>
+      <div style="background:#FFF7ED;border-radius:2vmin;padding:2.5vmin 2vmin;text-align:center">
+        <div style="font-size:2.6vmin;color:#6B7280;margin-bottom:0.8vmin">학습 단계</div>
+        <div style="font-size:4.5vmin;color:#C2410C;font-weight:700">2단계: 문제풀기</div>
+      </div>
+      <div style="background:#FEFCE8;border-radius:2vmin;padding:2.5vmin 2vmin;text-align:center">
+        <div style="font-size:2.6vmin;color:#6B7280;margin-bottom:0.8vmin">학습한 날짜</div>
+        <div id="result-date" style="font-size:4.5vmin;color:#A16207;font-weight:700"></div>
+      </div>
+    </div>
+
+    <!-- 학습 내용 / 더 학습한 내용 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2vmin;width:100%;max-width:140vh;flex:1;min-height:0">
+      <div style="background:#F0FDF4;border:2px solid #BBF7D0;border-radius:2vmin;padding:2.5vmin;display:flex;flex-direction:column;overflow:hidden">
+        <div style="font-size:3.2vmin;font-weight:700;color:#15803D;margin-bottom:1.5vmin;flex-shrink:0">✅ 한번에 푼 문제</div>
+        <div id="s2-correct-list" style="display:flex;flex-wrap:wrap;gap:1.2vmin;overflow-y:auto;scrollbar-width:none;align-content:flex-start"></div>
+      </div>
+      <div style="background:#FFF1F2;border:2px solid #FECDD3;border-radius:2vmin;padding:2.5vmin;display:flex;flex-direction:column;overflow:hidden">
+        <div style="font-size:3.2vmin;font-weight:700;color:#BE123C;margin-bottom:1.5vmin;flex-shrink:0">⚠️ 다시 푼 문제</div>
+        <div id="s2-wrong-list" style="display:flex;flex-wrap:wrap;gap:1.2vmin;overflow-y:auto;scrollbar-width:none;align-content:flex-start"></div>
+      </div>
+    </div>
+
+    <!-- 안내 메시지 (틀린 문제 있을 때) -->
+    <div id="result-notice" style="display:none;background:#FEF3C7;border:2px solid #FCD34D;border-radius:1.5vmin;padding:1.8vmin 2.5vmin;font-size:3vmin;color:#92400E;font-weight:700;text-align:center;flex-shrink:0;word-break:keep-all">
+      ⚠️ 틀린 문제를 다시 풀어야 다른 메뉴를 이용할 수 있어요!
+    </div>
+
+    <!-- 버튼 -->
+    <div style="display:flex;gap:2vmin;width:100%;max-width:120vh;flex-shrink:0">
+      <button id="btn-home" onclick="goHome()" style="flex:1;background:#E0E7FF;color:#1E3A8A;font-size:3.5vmin;padding:2.5vmin;border-radius:2vmin;font-weight:700;white-space:nowrap">🏠 메인 메뉴로</button>
+      <button id="btn-restart" onclick="restartS2()" style="flex:1;background:#FF7000;color:white;font-size:3.5vmin;padding:2.5vmin;border-radius:2vmin;font-weight:700;white-space:nowrap">🔄 이 단계 다시 공부하기</button>
+      <button id="btn-retry" onclick="retryWrong()" style="flex:1;background:#EF4444;color:white;font-size:3.5vmin;padding:2.5vmin;border-radius:2vmin;font-weight:700;display:none;white-space:nowrap">🔥 틀린 문제 다시 풀기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 피드백 오버레이 -->
+<div id="ov-feedback" class="overlay" style="display:none">
+  <div class="modal pop">
+    <div style="display:flex;align-items:center;justify-content:center;gap:2.5vmin;margin-bottom:3vmin">
+      <div id="ov-emoji" style="font-size:9vmin;line-height:1"></div>
+      <div id="ov-result-text" style="font-size:7vmin;font-weight:700"></div>
+    </div>
+    <div id="ov-sentence-ok" style="background:#F0FDF4;border-radius:1.5vmin;padding:2.5vmin 3vmin;margin-bottom:2vmin;font-size:6vmin;color:#166534;font-weight:700;display:none;word-break:keep-all;line-height:1.5"></div>
+    <div id="ov-fb-text" style="font-size:5vmin;color:#374151;margin-bottom:3vmin;line-height:1.9;text-align:center;word-break:keep-all"></div>
+    <button id="ov-next-btn" onclick="afterFeedback()" style="width:100%;font-size:5.5vmin;padding:3.5vmin;border-radius:2vmin;color:white"></button>
+  </div>
+</div>
+
+<!-- 심화 선택 오버레이 -->
+<div id="ov-extra" class="overlay" style="display:none">
+  <div class="modal pop">
+    <div style="font-size:14vmin;margin-bottom:1.5vmin">🧐</div>
+    <div style="font-size:7vmin;font-weight:700;color:#2D3E6B;margin-bottom:1.5vmin">참 잘했어요!</div>
+    <div style="font-size:5vmin;color:#6B7280;margin-bottom:3vmin">이 낱말을 좀 더 자세히 공부해 볼까요?</div>
+    <div style="display:flex;flex-direction:column;gap:2vmin">
+      <button onclick="doExtra()" style="background:#FF7000;color:white;font-size:5vmin;padding:3vmin;border-radius:2vmin;white-space:nowrap">네! 다른 예시도 볼래요 🏆</button>
+      <button onclick="skipExtra()" style="background:#3B82F6;color:white;font-size:4.8vmin;padding:2.8vmin;border-radius:2vmin;white-space:nowrap">아니요, 빙고판으로 🏅</button>
+    </div>
+  </div>
+</div>
+
+<!-- 쓰기 오버레이 -->
+<div id="ov-writing" class="overlay" style="display:none">
+  <div class="modal pop" style="width:min(98vw,98vh);max-height:96vh;padding:3vmin 5vmin;display:flex;flex-direction:column">
+    <div style="font-size:6vmin;margin-bottom:1vmin">✍️ 10칸 공책에 써 봅시다</div>
+    <div style="font-size:4vmin;color:#9CA3AF;margin-bottom:1.5vmin">띄어쓰기에 주의하며 써 보세요!</div>
+    <div id="writing-meaning" style="background:#EFF6FF;border:2px solid #BFDBFE;border-radius:1.5vmin;padding:2vmin 2.5vmin;margin-bottom:2vmin;font-size:3.8vmin;color:#1E3A8A;font-weight:700;word-break:keep-all;line-height:1.5;flex-shrink:0"></div>
+    <div id="ten-grid-content" class="ten-grid-wrap"></div>
+    <button onclick="closeWriting()" style="width:100%;background:#FF7000;color:white;font-size:5vmin;padding:2.8vmin;border-radius:2vmin;margin-top:2vmin;flex-shrink:0">다 썼어요! 다시 풀어볼게요 →</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   연결 주소 관리 (선생님 시트 연결)
+   우선순위: ① URL 해시 #c=… ② localStorage
+══════════════════════════════════════ */
+let _execUrl = '';
+
+function _initExecUrl() {
+  // ① 학생용 링크: #c=<exec주소>
+  const hash = location.hash || '';
+  const m = hash.match(/[#&]c=([^&]+)/);
+  if (m) {
+    _execUrl = decodeURIComponent(m[1]);
+    localStorage.setItem('execUrl', _execUrl);
+    // 학생용 접속: 선생님 버튼 숨김
+    const tb = document.getElementById('teacher-btn-wrap');
+    if (tb) tb.style.display = 'none';
+    return;
+  }
+  // ② 선생님이 저장해 둔 주소
+  _execUrl = localStorage.getItem('execUrl') || '';
+}
+
+function getExecUrl() { return _execUrl; }
+
+// 동적 스크립트 태그로 함수 호출 (조회용)
+let _cbIdx = 0;
+function _callApi(fn, arg, onSuccess, onError) {
+  const url = getExecUrl();
+  if (!url) {
+    if (onError) onError('연결 주소가 없습니다. ⚙️ 선생님 설정에서 시트 주소를 입력해 주세요.');
+    return;
+  }
+  const cbName = '_apicb' + (++_cbIdx);
+  const params = '?mode=api&fn=' + encodeURIComponent(fn) +
+    (arg !== undefined && arg !== '' ? '&arg=' + encodeURIComponent(arg) : '') +
+    '&callback=' + cbName;
+  window[cbName] = function(data) {
+    delete window[cbName];
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+    if (onSuccess) onSuccess(data);
+  };
+  const el = document.createElement('script');
+  el.onerror = function() {
+    delete window[cbName];
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+    if (onError) onError('네트워크 오류');
+  };
+  el.src = url + params;
+  document.body.appendChild(el);
+}
+
+// 저장 요청 (응답을 읽지 않으므로 fetch POST 사용 가능, CORS 무관)
+function _saveApi(studentInfo, stage, data) {
+  const url = getExecUrl();
+  if (!url) return;
+  const params = new URLSearchParams({
+    mode: 'save',
+    studentInfo: studentInfo,
+    stage: stage,
+    data: JSON.stringify(data)
+  });
+  fetch(url + '?' + params.toString(), { method: 'GET', mode: 'no-cors' }).catch(function(){});
+}
+
+// 선생님 설정 UI
+function toggleTeacherPanel() {
+  const p = document.getElementById('teacher-panel');
+  if (!p) return;
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  if (p.style.display === 'block') {
+    const inp = document.getElementById('exec-url-input');
+    if (inp) inp.value = getExecUrl();
+  }
+}
+
+function connectSheet() {
+  const inp = document.getElementById('exec-url-input');
+  if (!inp) return;
+  const val = inp.value.trim();
+  if (!val || !val.startsWith('http')) {
+    alert('올바른 주소를 입력해 주세요.\n예) https://script.google.com/macros/s/.../exec');
+    return;
+  }
+  _execUrl = val;
+  localStorage.setItem('execUrl', val);
+  // 학생용 링크 생성
+  const studentUrl = location.origin + location.pathname + '#c=' + encodeURIComponent(val);
+  const box  = document.getElementById('student-link-box');
+  const text = document.getElementById('student-link-text');
+  if (box)  box.style.display  = 'block';
+  if (text) text.textContent   = studentUrl;
+  // 명단·낱말 데이터 즉시 새로 불러오기
+  loadStudents();
+  loadWordData();
+}
+
+function copyStudentLink() {
+  const text = document.getElementById('student-link-text');
+  if (!text) return;
+  navigator.clipboard.writeText(text.textContent).then(function() {
+    alert('학생용 주소가 복사됐습니다!');
+  }).catch(function() {
+    const ta = document.createElement('textarea');
+    ta.value = text.textContent;
+    document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('학생용 주소가 복사됐습니다!');
+  });
+}
+
+/* ══════════════════════════════════════
+   앱 초기화
+══════════════════════════════════════ */
+function initApp(){
+  _initExecUrl();
+  const hasUrl = !!getExecUrl();
+  if(hasUrl){
+    loadStudents();
+    loadWordData();
+  } else {
+    // ── 오프라인 폴백 (미리보기용 샘플) ──
+    WORDS=[
+      {pair:'맞히다/마치다',w1:'맞히다',w2:'마치다',m1:'정답을 맞추는 것',m2:'일이나 과정을 끝내는 것',rowIndex:2,q:[]},
+      {pair:'걸음/거름',w1:'걸음',w2:'거름',m1:'두 발을 떼서 걷는 동작',m2:'식물에 주는 영양분',rowIndex:3,q:[]},
+      {pair:'느리다/늘이다',w1:'느리다',w2:'늘이다',m1:'천천히 움직이는 것',m2:'길게 잡아당기는 것',rowIndex:4,q:[]},
+      {pair:'다치다/닫히다',w1:'다치다',w2:'닫히다',m1:'몸에 상처가 나는 것',m2:'열린 것이 닫기는 것',rowIndex:5,q:[]},
+      {pair:'반듯이/반드시',w1:'반듯이',w2:'반드시',m1:'똑바른 모양',m2:'틀림없이 꼭',rowIndex:6,q:[]},
+      {pair:'때/떼',w1:'때',w2:'떼',m1:'시간·먼지',m2:'무리',rowIndex:7,q:[]},
+      {pair:'붙이다/부치다',w1:'붙이다',w2:'부치다',m1:'달라붙게 하는 것',m2:'편지를 보내는 것',rowIndex:8,q:[]},
+      {pair:'맞다/맡다',w1:'맞다',w2:'맡다',m1:'정답이 안 틀린 것',m2:'냄새를 맡거나 책임지는 것',rowIndex:9,q:[]},
+      {pair:'바치다/받치다',w1:'바치다',w2:'받치다',m1:'정성껏 드리는 것',m2:'아래에서 받쳐주는 것',rowIndex:10,q:[]},
+    ];
+    BONUS=[
+      {pair:'식히다/시키다',w1:'식히다',w2:'시키다',m1:'뜨거운 것을 식히는 것',m2:'음식 주문·일 시키는 것',rowIndex:11,q:[]},
+      {pair:'갔다/같다',w1:'갔다',w2:'같다',m1:'이동한 것',m2:'똑같은 것',rowIndex:12,q:[]},
+    ];
+    ALL=[...WORDS,...BONUS];
+    wordData=ALL.map(w=>({rowIndex:w.rowIndex,pair:w.pair,word1:w.w1,word2:w.w2,meaning1:w.m1,meaning2:w.m2,note1:'',note2:''}));
+    Array.from({length:30},function(_,i){return (i+1)+' 학생'+(i+1);}).forEach(function(s){
+      const opt=document.createElement('option');opt.value=s;opt.textContent=s;
+      document.getElementById('sel-name').appendChild(opt);
+    });
+  }
+}
+
+function loadStudents(){
+  _callApi('getStudents', '', function(list){
+    const sel=document.getElementById('sel-name');
+    sel.innerHTML='<option value="">-- 이름 선택 --</option>';
+    const arr=Array.isArray(list)?list:[];
+    if(arr.length===0){
+      console.warn('학생명단이 비어있습니다. 시트명/데이터 확인 필요');
+    }
+    arr.forEach(function(s){
+      const opt=document.createElement('option');
+      opt.value=s; opt.textContent=s; sel.appendChild(opt);
+    });
+  }, function(e){
+    console.error('학생명단 오류',e);
+    showLoadError('학생 명단을 불러오지 못했어요: '+(e&&e.message||e));
+  });
+}
+
+function loadWordData(){
+  _callApi('getWordData', '', function(words){
+    if(!Array.isArray(words)||!words.length){
+      console.warn('낱말데이터가 비어있습니다.');
+      showLoadError('낱말 데이터가 비어있어요. 스프레드시트의 "낱말데이터" 시트를 확인해 주세요.');
+      return;
+    }
+    wordData=words;
+    const main=words.slice(0,9);
+    const bonus=words.slice(9);
+    WORDS=main.map(function(w){
+      return {pair:w.pair,w1:w.word1,w2:w.word2,
+              m1:w.meaning1,m2:w.meaning2,n1:w.note1,n2:w.note2,
+              rowIndex:w.rowIndex,q:[]};
+    });
+    BONUS=bonus.map(function(w){
+      return {pair:w.pair,w1:w.word1,w2:w.word2,
+              m1:w.meaning1,m2:w.meaning2,n1:w.note1,n2:w.note2,
+              rowIndex:w.rowIndex,q:[]};
+    });
+    ALL=[...WORDS,...BONUS];
+    // 빙고판이 이미 화면에 있으면 다시 그림
+    if(document.getElementById('s-bingo').classList.contains('active')) renderBingo();
+  }, function(e){
+    console.error('낱말데이터 오류',e);
+    showLoadError('낱말 데이터를 불러오지 못했어요: '+(e&&e.message||e));
+  });
+}
+
+// 에러 토스트
+function showLoadError(msg){
+  let box=document.getElementById('load-error');
+  if(!box){
+    box=document.createElement('div');
+    box.id='load-error';
+    box.style.cssText='position:fixed;bottom:2vh;left:50%;transform:translateX(-50%);background:#FEE2E2;color:#B91C1C;border:2px solid #FCA5A5;border-radius:2vmin;padding:1.9vmin 3.8vmin;font-size:2.8vmin;font-weight:700;z-index:999;max-width:90vw;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.15)';
+    document.body.appendChild(box);
+  }
+  box.textContent='⚠️ '+msg;
+}
+
+/* ══════════════════════════════════════
+   결과 저장 (GAS)
+══════════════════════════════════════ */
+function saveStage1(){
+  if(!userName||!getExecUrl()) return;
+  const sid='stage1-'+userName+'-'+Date.now();
+  if(recordedSessions.has(sid)) return;
+  const pairs=[];
+  Object.keys(completed).forEach(function(idx){
+    const n=Number(idx);
+    const wd=ALL[n];
+    if(!wd) return;
+    const hasError=stage1Results.filter(r=>r.pair===wd.pair).some(r=>!r.correct);
+    pairs.push({name:wd.pair,correct:!hasError,trophy:completed[idx]==='trophy'});
+  });
+  if(pairs.length>0){
+    _saveApi(userName,'1단계',{pairs:pairs});
+    recordedSessions.add(sid);
+  }
+}
+
+function saveStage2(){
+  if(!userName||!getExecUrl()) return;
+  const sid='stage2-'+userName+'-'+Date.now();
+  if(recordedSessions.has(sid)) return;
+  const correctItems=[...new Set(s2results.filter(r=>r.correct).map(r=>r.pair))];
+  const incorrectItems=[...new Set(s2results.filter(r=>!r.correct).map(r=>r.pair))];
+  _saveApi(userName,'2단계',{
+    totalCount:s2results.length,
+    correctCount:correctItems.length,
+    correctItems,incorrectItems
+  });
+  recordedSessions.add(sid);
+}
+
+/* ══════════════════════════════════════
+   유틸
+══════════════════════════════════════ */
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  // 1단계 → 빙고판으로 돌아갈 때 결과 저장
+  if(id==='s-bingo'&&stage1Results.length>0) saveStage1();
+  // 2단계 결과 화면 도달 시 저장
+  if(id==='s-s2result'&&s2results.length>0) saveStage2();
+}
+function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
+
+function formatSentence(ex,word){
+  if(!ex||!word) return '<span style="display:inline-block;background:#FEF08A;border-bottom:3px solid #EAB308;min-width:12vmin;height:1.2em;border-radius:.5vmin;vertical-align:middle"></span>';
+
+  const blank='<span style="display:inline-block;background:#FEF08A;border:2.5px solid #EAB308;border-radius:1vmin;min-width:12vmin;height:1.3em;vertical-align:middle;margin:0 .3vmin"></span>';
+
+  word=word.trim();
+  let done=false;
+  const tokens=ex.split(/(\s+)/);
+
+  // 정답 단어가 명사인지 동사/형용사인지에 따라 처리가 다름
+  // - 명사(걸음/거름): 어간=단어전체, 뒤에 조사(을/를/이/가/에...)가 붙음 → 단어 부분만 빈칸, 조사 보존
+  // - 동사(맞히다): '다'로 끝남 → 활용형 전체를 빈칸
+  const isVerb=/다$/.test(word);
+
+  // 어간 후보 (긴 것부터)
+  const stems=[];
+  if(isVerb){
+    // 동사/형용사: '다' 제거한 어간부터
+    for(let len=word.length-1;len>=1;len--) stems.push(word.slice(0,len));
+  } else {
+    // 명사: 단어 전체 우선, 그 다음 짧게
+    for(let len=word.length;len>=1;len--) stems.push(word.slice(0,len));
+  }
+
+  return tokens.map(tok=>{
+    if(done||/^\s+$/.test(tok)) return tok;
+    const cl=tok.replace(/[^가-힣]/g,'');
+    if(!cl) return tok;
+
+    for(const stem of stems){
+      if(cl.startsWith(stem)){
+        done=true;
+        if(isVerb){
+          // 동사: 한글 부분 전체를 빈칸으로 (활용형 통째)
+          // 단, 뒤 구두점은 보존
+          const trailing=tok.replace(/^[가-힣]+/, '');  // 한글 뒤 구두점 등
+          const leading=tok.match(/^[^가-힣]*/)[0];      // 한글 앞 기호
+          return leading + blank + trailing;
+        } else {
+          // 명사: 단어(stem 길이)만 빈칸, 나머지(조사+구두점) 보존
+          // cl에서 단어 부분의 길이만큼만 빈칸 처리
+          const wordLen=word.length;  // 명사 전체 길이
+          // 토큰에서 한글이 시작하는 위치 찾기
+          const hangulStart=tok.search(/[가-힣]/);
+          const before=tok.slice(0,hangulStart);
+          const after=tok.slice(hangulStart+wordLen);  // 단어 뒤 = 조사+구두점
+          return before + blank + after;
+        }
+      }
+    }
+    return tok;
+  }).join('');
+}
+
+// 보기(bogie)에서 [정답형, 오답형] 추출
+// bogie는 "정답활용형/오답활용형" 순서로 저장됨 (보기 시트 규칙)
+// 반환: {ansLabel, wrongLabel}
+function getBogieParts(bogie, correctBase, w1, w2){
+  if(bogie&&bogie.includes('/')){
+    const parts=bogie.split('/').map(s=>s.trim());
+    if(parts.length===2) return {ansLabel:parts[0], wrongLabel:parts[1]};
+  }
+  // bogie 없으면 기본형 사용
+  correctBase=(correctBase||'').trim();
+  const correctIsW1=(correctBase===(w1||'').trim());
+  return correctIsW1
+    ? {ansLabel:w1, wrongLabel:w2}
+    : {ansLabel:w2, wrongLabel:w1};
+}
+
+// 화면 버튼용: 보기는 시트에 "w1형/w2형" 순서로 저장됨 → 그대로 [w1형, w2형] 반환
+// 버튼 0번=w1형, 1번=w2형 이 보장되므로 채점(0=w1,1=w2)과 일치
+function getBogieLabels(bogie, correctBase, w1, w2){
+  w1=(w1||'').trim(); w2=(w2||'').trim();
+  if(!bogie||!bogie.includes('/')) return [w1,w2];
+  const parts=bogie.split('/').map(s=>s.trim());
+  if(parts.length!==2) return [w1,w2];
+  const [a,b]=parts;
+
+  // 어떤 활용형이 어느 단어 계열인지 점수 매기기
+  // 점수 1: 어간(앞 N글자) 일치
+  // 점수 2: 첫 글자가 완전히 같음 (받침 포함)
+  // 점수 3: 단어 전체가 일치
+  function score(form, base){
+    if(form===base) return 100;
+    if(!form||!base) return 0;
+    let sc=0;
+    // 첫 글자가 완전히 같으면 +10
+    if(form[0]===base[0]) sc+=10;
+    // 어간 일치 글자수 (앞에서부터 같은 글자수)
+    for(let i=0;i<Math.min(form.length,base.length);i++){
+      if(form[i]===base[i]) sc++;
+      else break;
+    }
+    return sc;
+  }
+
+  const a_w1=score(a,w1), a_w2=score(a,w2);
+  const b_w1=score(b,w1), b_w2=score(b,w2);
+
+  // a가 w1 계열, b가 w2 계열일 때의 총점 vs a가 w2 계열, b가 w1 계열일 때의 총점
+  const score_normal = a_w1 + b_w2;   // [a, b] = [w1형, w2형]
+  const score_swap   = a_w2 + b_w1;   // [b, a] = [w1형, w2형]
+
+  if(score_swap > score_normal) return [b, a];  // 뒤집기
+  return [a, b];  // 그대로
+}
+
+// 10칸 공책 팝업 열기: 뜻은 화면에 보여주고, 공책에는 예시 문장만 쓰게 함
+function openWriting(word, meaning, sentence){
+  const meaningEl=document.getElementById('writing-meaning');
+  if(meaningEl){
+    meaningEl.textContent=(word||'')+': '+(meaning||'');
+  }
+  renderTenGrid(sentence||'');
+  document.getElementById('ov-writing').style.display='flex';
+}
+
+// 2단계 오답 시: 그림을 화면에 표시하고 같은 문제를 다시 풀게 함
+// (팝업이 아니라 1단계처럼 화면에 그림+문장+버튼 함께 보이게)
+function showRethink(){
+  s2hintVisible=true;
+  document.getElementById('s2-rethink-tag').style.display='inline-block';
+  s2answered=false;
+  renderS2();  // 그림 표시 + 버튼 활성화
+}
+
+function renderTenGrid(sentence){
+  const wrap=document.getElementById('ten-grid-content');
+  wrap.innerHTML='';
+
+  // ── 1단계: 모든 행(rowChars 배열)을 먼저 계산 ──
+  const allRows=[];          // 각 그룹별 행 배열
+  (sentence||'').split('\n').forEach((line, lineIdx)=>{
+    const chars=[...line];
+    let pos=0;
+    let isFirstRowOfLine=true;
+    const groupRows=[];
+
+    while(pos<chars.length || (isFirstRowOfLine && chars.length===0)){
+      let rowChars=chars.slice(pos, pos+10);
+      const isVeryFirst=(lineIdx===0 && isFirstRowOfLine);
+      if(!isVeryFirst){
+        while(rowChars.length>0 && rowChars[0]===' '){
+          pos++;
+          rowChars=chars.slice(pos, pos+10);
+        }
+      }
+      groupRows.push(rowChars);
+      pos+=rowChars.length;
+      isFirstRowOfLine=false;
+      if(rowChars.length===0) break;
+      while(pos<chars.length && chars[pos]===' ') pos++;
+    }
+    allRows.push(groupRows);
+  });
+
+  // ── 2단계: 총 행 수에 맞춰 셀 높이 동적 계산 ──
+  const totalRows=allRows.reduce((s,g)=>s+g.length,0);
+  // 사용 가능한 높이(약 62vh)를 총 행 수로 나눔, 최소 4vh ~ 최대 6.5vh
+  let cellH=Math.min(6.5, Math.max(3.5, 62/Math.max(totalRows,1)));
+
+  // ── 3단계: 셀 생성 ──
+  const makeCell=(ch)=>{
+    const cell=document.createElement('div');
+    cell.className='ten-cell';
+    cell.style.height=cellH+'vh';
+    if(ch===undefined||ch===null){
+      cell.style.background='#FFF';
+      cell.style.border='2px solid #FFE8E0';
+    } else if(ch===' '){
+      cell.textContent='';
+    } else if(ch==='.'){
+      const dot=document.createElement('span');
+      dot.textContent='.';
+      dot.style.cssText='position:absolute;bottom:0.5vmin;left:0.8vmin;font-size:inherit;line-height:1';
+      cell.appendChild(dot);
+    } else {
+      cell.textContent=ch;
+    }
+    return cell;
+  };
+
+  allRows.forEach(groupRows=>{
+    groupRows.forEach(rowChars=>{
+      const row=document.createElement('div');
+      row.className='ten-row';
+      for(let i=0;i<10;i++){
+        row.appendChild(makeCell(i<rowChars.length?rowChars[i]:undefined));
+      }
+      wrap.appendChild(row);
+    });
+  });
+}
+
+function playChime(){if(isMuted)return;try{const c=new(window.AudioContext||window.webkitAudioContext)(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';[523.25,659.25,783.99].forEach((f,i)=>o.frequency.setValueAtTime(f,t+i*.1));g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.01,t+1);o.start(t);o.stop(t+1);}catch(_){}}
+function playWrong(){if(isMuted)return;try{const c=new(window.AudioContext||window.webkitAudioContext)(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sawtooth';o.frequency.setValueAtTime(150,t);g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.01,t+.5);o.start(t);o.stop(t+.5);}catch(_){}}
+
+/* ══════════════════════════════════════
+   로그인
+══════════════════════════════════════ */
+function onNameChange(){
+  const v=document.getElementById('sel-name').value;
+  const b=document.getElementById('btn-enter');
+  b.disabled=!v;
+  b.style.background=v?'#FF7000':'#E5E7EB';
+  b.style.color=v?'white':'#9CA3AF';
+}
+// ── 체험 모드 이어하기(학생별 빙고 진행 저장/복원) ──
+function _progKey(){ return 'progress:헷갈리기:'+(userName||''); }
+function saveProgress(){ try{ if(!userName) return; localStorage.setItem(_progKey(), JSON.stringify(completed)); }catch(e){} }
+function loadProgress(){ try{ if(!userName) return; var raw=localStorage.getItem(_progKey()); if(raw){ var o=JSON.parse(raw); Object.keys(o).forEach(function(k){ completed[k]=o[k]; }); } }catch(e){} }
+function doLogin(){
+  Object.keys(completed).forEach(function(k){ delete completed[k]; });
+  userName=document.getElementById('sel-name').value;
+  stage1Results=[];
+  loadProgress();
+  // 이름 파싱: "1. 홍길동" / "1 홍길동" / "1가 홍길동" 등 다양한 형식 지원
+  const nameOnly=userName.replace(/^\d+[가-힣\.\s]*\s*/, '').trim() || userName;
+  document.getElementById('mode-title').textContent=nameOnly+' 학생, 어떤 공부를 할까요?';
+  renderBingo();
+  goTo('s-mode');
+}
+function toggleMute(){
+  isMuted=!isMuted;
+  document.getElementById('btn-mute').textContent=isMuted?'🔇 소리 켜기':'🔊 소리 끄기';
+}
+
+/* ══════════════════════════════════════
+   빙고판
+══════════════════════════════════════ */
+function getBingoCount(){
+  const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  return lines.filter(l=>l.every(i=>completed[i])).length;
+}
+
+function renderBingo(){
+  const grid=document.getElementById('bingo-grid');
+  grid.innerHTML='';
+  if(WORDS.length===0){
+    grid.innerHTML='<div style="grid-column:1/-1;align-self:center;text-align:center;color:#9CA3AF;font-size:3.5vmin;width:100%">📡 낱말 데이터를 불러오는 중...<br><span style="font-size:2.5vmin">잠시만 기다려 주세요</span></div>';
+    return;
+  }
+  WORDS.forEach((wd,i)=>{
+    const done=completed[i];
+    const btn=document.createElement('button');
+    btn.className='bingo-btn'+(done==='trophy'?' done-trophy':done==='badge'?' done-badge':'');
+    // 그리드 셀을 꽉 채우도록 width/height 100%
+    btn.style.width='100%';
+    btn.style.height='100%';
+    if(done){
+      btn.innerHTML=`<span style="font-size:7.0vmin">${done==='trophy'?'🏆':'🏅'}</span><span style="font-size:3.1vmin;color:${done==='trophy'?'#B45309':'#15803D'}">${done==='trophy'?'심화 마스터':'기본 뱃지'}</span>`;
+    } else {
+      btn.innerHTML=`<span style="font-size:5.0vmin;font-weight:700;color:#2D3E6B">${wd.w1}</span><span style="font-size:3.4vmin;color:#93C5FD">VS</span><span style="font-size:5.0vmin;font-weight:700;color:#2D3E6B">${wd.w2}</span>`;
+      btn.onclick=()=>startReview(i);
+    }
+    grid.appendChild(btn);
+  });
+
+  const bonus=document.getElementById('bonus-list');
+  bonus.innerHTML='';
+  const bingoN=getBingoCount();
+  BONUS.forEach((wd,i)=>{
+    const unlocked=bingoN>i;
+    const done=completed[9+i];
+    const btn=document.createElement('button');
+    btn.style.cssText=`background:${unlocked?(done==='trophy'?'#FFFBEB':done==='badge'?'#F0FDF4':'white'):'#F3F4F6'};border:1.5px solid ${unlocked?'#FED7AA':'#E5E7EB'};border-radius:1.5vmin;padding:1.9vmin 1.2vmin;opacity:${unlocked?1:.5};cursor:${unlocked&&!done?'pointer':'default'};text-align:center;width:100%;font-family:'Jua',sans-serif`;
+    if(!unlocked){
+      btn.innerHTML=`<div style="font-size:3.1vmin;color:#9CA3AF">🔒 빙고 ${i+1}줄 후 오픈</div>`;
+    } else if(done){
+      btn.innerHTML=`<span style="font-size:5.0vmin">${done==='trophy'?'🏆':'🏅'}</span>`;
+    } else {
+      btn.innerHTML=`<div style="font-size:3.9vmin;font-weight:700;color:#C2410C">${wd.w1}<span style="font-size:3.4vmin;color:#FCA5A5"> vs </span>${wd.w2}</div>`;
+      btn.onclick=()=>startReview(9+i);
+    }
+    bonus.appendChild(btn);
+  });
+
+  const done=Object.keys(completed).filter(k=>Number(k)<9).length;
+  document.getElementById('bingo-progress').style.width=(done/Math.max(WORDS.length,1)*100)+'%';
+  document.getElementById('bingo-count-tag').textContent='빙고 '+bingoN+'줄!';
+}
+
+/* ══════════════════════════════════════
+   1단계: GAS에서 이미지+예시+보기 로드
+══════════════════════════════════════ */
+function startReview(idx){
+  rvIdx=idx; rvPos=0; rvSubStep='picture'; rvAnswered=false; rvDidExtra=false;
+  rvQueue=[]; rvExtra=[];
+
+  const wd=ALL[idx];
+  if(!wd) return;
+
+  // 로딩 표시
+  document.getElementById('rv-img-box').innerHTML='<div style="font-size:4.2vmin;color:#9CA3AF;animation:spin 1s linear infinite;display:inline-block">⟳</div>';
+  renderReviewShell(wd);
+  goTo('s-review');
+
+  if(getExecUrl()){
+    _callApi('getWordImages', wd.rowIndex, function(imgs){
+      const im1=shuffle(imgs.images1||[]);
+      const im2=shuffle(imgs.images2||[]);
+      const main=[], extra=[];
+      if(im1.length>0){main.push(im1[0]); extra.push(...im1.slice(1));}
+      if(im2.length>0){main.push(im2[0]); extra.push(...im2.slice(1));}
+      rvQueue=shuffle(main);
+      rvExtra=shuffle(extra);
+      renderReview();
+    }, function(e){
+      console.error('이미지 로드 오류',e);
+      rvQueue=[{ex:'',bogie:'',word:wd.w1,word1:wd.w1,word2:wd.w2,url:'',meaning1:wd.m1,meaning2:wd.m2}];
+      renderReview();
+    });
+  } else {
+    // 오프라인 폴백
+    rvQueue=[
+      {ex:'예시 문장입니다.',bogie:wd.w1+'/'+wd.w2,word:wd.w1,word1:wd.w1,word2:wd.w2,url:'',meaning1:wd.m1,meaning2:wd.m2,pair:wd.pair,isExtra:false},
+      {ex:'두 번째 예시 문장입니다.',bogie:wd.w2+'/'+wd.w1,word:wd.w2,word1:wd.w1,word2:wd.w2,url:'',meaning1:wd.m1,meaning2:wd.m2,pair:wd.pair,isExtra:false},
+    ];
+    renderReview();
+  }
+}
+
+function renderReviewShell(wd){
+  document.getElementById('rv-pair-title').textContent=wd.pair;
+  const subTag=document.getElementById('rv-substep-tag');
+  subTag.textContent='① 그림 맞히기';subTag.style.background='#DBEAFE';subTag.style.color='#1D4ED8';
+  document.getElementById('rv-btn1').textContent=wd.w1;
+  document.getElementById('rv-btn2').textContent=wd.w2;
+}
+
+function renderReview(){
+  const wd=ALL[rvIdx];
+  const q=rvQueue[rvPos]||{};
+  document.getElementById('rv-pair-title').textContent=wd.pair;
+  document.getElementById('rv-counter').textContent='그림 '+(rvPos+1)+'/'+rvQueue.length;
+
+  const subTag=document.getElementById('rv-substep-tag');
+  if(rvSubStep==='picture'){
+    subTag.textContent='① 그림 맞히기';subTag.style.background='#DBEAFE';subTag.style.color='#1D4ED8';
+    document.getElementById('rv-sentence-box').style.display='none';
+    // 이미지 렌더
+    const imgBox=document.getElementById('rv-img-box');
+    imgBox.style.display='flex';
+    if(q.url){
+      imgBox.innerHTML=`<img src="${q.url}" style="width:100%;height:100%;object-fit:contain;padding:0.6vmin" alt="학습 그림" onerror="this.parentElement.innerHTML='<div style=\\'font-size:4.2vmin;color:#D1D5DB\\'>🖼️</div>'">`;
+    } else {
+      imgBox.innerHTML='<div style="font-size:5.6vmin;color:#D1D5DB">🖼️</div><div style="font-size:2.1vmin;color:#F97316;background:#FFF7ED;border-radius:1vmin;padding:0.5vmin 1.5vmin;border:1px solid #FED7AA">실제 앱에서 그림이 표시됩니다</div>';
+    }
+    // 그림 단계 버튼: 기본형
+    document.getElementById('rv-btn1').textContent=wd.w1;
+    document.getElementById('rv-btn2').textContent=wd.w2;
+  } else {
+    subTag.textContent='② 문장 완성하기';subTag.style.background='#EDE9FE';subTag.style.color='#6D28D9';
+    document.getElementById('rv-sentence-box').style.display='block';
+    document.getElementById('rv-sentence-box').innerHTML=formatSentence(q.ex,q.word||q.w);
+    document.getElementById('rv-img-box').style.display='none';
+    // 문장 단계 버튼: 보기(bogie) 사용 - [w1형, w2형] 순서
+    const labels=getBogieLabels(q.bogie, q.word||q.w, wd.w1, wd.w2);
+    document.getElementById('rv-btn1').textContent=labels[0];
+    document.getElementById('rv-btn2').textContent=labels[1];
+  }
+
+  const[b1,b2]=[document.getElementById('rv-btn1'),document.getElementById('rv-btn2')];
+  applyBtnColors(b1,b2);
+}
+
+// 두 선택 버튼에 구분되는 색 적용 (0번=파랑, 1번=분홍)
+const BTN_THEME=[
+  {bg:'#EFF6FF', border:'#60A5FA', color:'#1D4ED8', solid:'#3B82F6'},  // 0번 파랑
+  {bg:'#FDF2F8', border:'#F472B6', color:'#BE185D', solid:'#EC4899'}   // 1번 분홍
+];
+function applyBtnColors(b1,b2){
+  [b1,b2].forEach((b,i)=>{
+    const t=BTN_THEME[i];
+    b.disabled=false;b.style.opacity='1';
+    b.style.background=t.bg;
+    b.style.border='3px solid '+t.border;
+    b.style.color=t.color;
+    b.onmouseenter=function(){this.style.background=t.border;this.style.color='white';};
+    b.onmouseleave=function(){this.style.background=t.bg;this.style.color=t.color;};
+  });
+}
+
+function checkRv(btnIdx){
+  if(rvAnswered||rvQueue.length===0) return;
+  const wd=ALL[rvIdx];const q=rvQueue[rvPos];
+
+  // 정답 기본형 (trim으로 공백 제거)
+  const correctBase=(q.word||q.w||'').trim();
+  // 정답이 word1인지 word2인지 판별
+  const correctIsW1=(correctBase===wd.w1.trim());
+
+  if(rvSubStep==='picture'){
+    // 그림 단계: 버튼은 항상 기본형 w1/w2 (0번=w1, 1번=w2)
+    const chosenIsW1=(btnIdx===0);
+    rvCorrect=(chosenIsW1===correctIsW1);
+  } else {
+    // 문장 단계: 버튼은 [w1형, w2형] 순서로 표시되므로 0번=w1, 1번=w2
+    const chosenIsW1=(btnIdx===0);
+    rvCorrect=(chosenIsW1===correctIsW1);
+  }
+
+  rvAnswered=true;
+  [document.getElementById('rv-btn1'),document.getElementById('rv-btn2')].forEach(b=>{
+    b.disabled=true;b.style.opacity='.4';
+  });
+
+  // 피드백 텍스트
+  const m_correct=correctIsW1?wd.m1:wd.m2;
+  const wrongBase =correctIsW1?wd.w2:wd.w1;
+  const m_wrong   =correctIsW1?wd.m2:wd.m1;
+  let fb='';
+  if(rvCorrect){fb=correctBase+': '+m_correct;}
+  else{fb='❌ '+wrongBase+': '+m_wrong+'\n⭕ '+correctBase+': '+m_correct;}
+
+  stage1Results.push({pair:wd.pair,correct:rvCorrect,type:rvSubStep});
+  showFeedback(rvCorrect,wd,q,fb,false,correctIsW1);
+  rvCorrect?playChime():playWrong();
+}
+
+function showFeedback(ok,wd,q,fb,isS2,correctIsW1){
+  // 정답 단어 색 테마 (0번=파랑, 1번=분홍)
+  const theme=correctIsW1?BTN_THEME[0]:BTN_THEME[1];
+  document.getElementById('ov-emoji').textContent=ok?'⭕':'❌';
+  const rt=document.getElementById('ov-result-text');
+  rt.textContent=ok?'정답이에요!':'아쉽네요!';
+  rt.style.color=ok?theme.color:'#DC2626';
+
+  const sentOk=document.getElementById('ov-sentence-ok');
+  const showExample = ok && (isS2 || rvSubStep==='sentence');
+  if(showExample && q && q.ex){
+    sentOk.style.display='block';
+    // 예문 박스를 정답 단어 색 테마로
+    sentOk.style.background=theme.bg;
+    sentOk.style.color=theme.color;
+    sentOk.innerHTML='"'+highlightAnswer(q.ex, q.word||q.w||wd.w1, wd.w1, wd.w2, theme)+'"';
+  } else {
+    sentOk.style.display='none';
+  }
+
+  // 뜻 설명
+  const fbEl=document.getElementById('ov-fb-text');
+  fbEl.innerHTML=fb.split('\n').map(line=>`<div style="margin-bottom:0.8vmin;word-break:keep-all;line-height:1.6">${line}</div>`).join('');
+  const nb=document.getElementById('ov-next-btn');
+  // 다음 버튼: 정답이면 테마 진한색, 오답이면 주황
+  nb.style.background=ok?theme.solid:'#FF7000';
+  if(ok){nb.textContent=isS2?(s2pos+1<s2queue.length?'다음 문제 →':'결과 확인하기 🏆'):rvSubStep==='picture'?'문장 채우러 가기 →':'다음으로! →';}
+  else{nb.textContent='10칸 공책에 쓰기 ✍️';}
+  document.getElementById('ov-feedback').style.display='flex';
+  const m=document.querySelector('#ov-feedback .modal');
+  m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop');
+}
+
+// 예문에서 정답 단어(활용형)를 찾아 하이라이트 (theme 색 사용)
+function highlightAnswer(ex, correctBase, w1, w2, theme){
+  if(!ex) return '';
+  theme=theme||{solid:'#EAB308',color:'#B45309'};
+  const hlStyle='background:'+theme.solid+';color:white;padding:0 1vmin;border-radius:.8vmin;font-weight:700';
+  correctBase=(correctBase||'').trim();
+  const isNoun=!/다$/.test(correctBase);
+  const stems=[];
+  if(isNoun){
+    for(let len=correctBase.length;len>=1;len--) stems.push(correctBase.slice(0,len));
+  } else {
+    for(let len=correctBase.length-1;len>=1;len--) stems.push(correctBase.slice(0,len));
+  }
+
+  let done=false;
+  return ex.split(/(\s+)/).map(tok=>{
+    if(done||/^\s+$/.test(tok)) return tok;
+    const cl=tok.replace(/[^가-힣]/g,'');
+    if(!cl) return tok;
+    for(const stem of stems){
+      if(cl.startsWith(stem)){
+        done=true;
+        const hangulStart=tok.search(/[가-힣]/);
+        const before=tok.slice(0,hangulStart);
+        if(isNoun){
+          const wordPart=tok.slice(hangulStart, hangulStart+correctBase.length);
+          const after=tok.slice(hangulStart+correctBase.length);
+          return before+'<span style="'+hlStyle+'">'+wordPart+'</span>'+after;
+        } else {
+          const hangul=cl;
+          const trailing=tok.slice(hangulStart+hangul.length);
+          return before+'<span style="'+hlStyle+'">'+hangul+'</span>'+trailing;
+        }
+      }
+    }
+    return tok;
+  }).join('');
+}
+
+function afterFeedback(){
+  document.getElementById('ov-feedback').style.display='none';
+  const inS2=document.getElementById('s-s2quiz').classList.contains('active');
+  if(inS2){
+    const q=s2queue[s2pos];const wd=q.wd;
+    const correctBase=(q.word||q.w||'').trim();
+    const ok=s2LastOk;  // 방금 선택의 정답 여부
+    const correctIsW1=(correctBase===(wd.w1||'').trim());
+    const meaning=correctIsW1?wd.m1:wd.m2;
+
+    // 다시 생각 단계를 거친 경우: 결과와 무관하게 10칸 공책으로
+    if(s2Rethought){
+      s2Rethought=false;
+      openWriting(correctBase, meaning, q.ex||'');
+      s2answered=false; return;
+    }
+    // 처음 틀린 경우: 그림 보고 다시 생각하기 (인라인 표시)
+    if(!ok){
+      s2Rethought=true;
+      showRethink();
+      return;
+    }
+    // 처음에 바로 맞힌 경우: 다음 문제로
+    if(s2pos+1<s2queue.length){s2pos++;s2answered=false;if(!isRetry)s2hintVisible=false;document.getElementById("s2-rethink-tag").style.display="none";renderS2();}
+    else{
+      if(isRetry) retryCompleted=true;  // 재도전 완료 표시
+      renderS2Result();goTo('s-s2result');
+    }
+    return;
+  }
+  // 1단계
+  if(!rvCorrect){
+    const wd=ALL[rvIdx];const q=rvQueue[rvPos];
+    const correctBase=(q.word||q.w||'').trim();
+    const correctIsW1=(correctBase===(wd.w1||'').trim());
+    const meaning=correctIsW1?wd.m1:wd.m2;
+    openWriting(correctBase, meaning, q.ex||'');
+    return;
+  }
+  if(rvSubStep==='picture'){rvSubStep='sentence';rvAnswered=false;renderReview();}
+  else{
+    if(rvPos+1<rvQueue.length){rvPos++;rvSubStep='picture';rvAnswered=false;renderReview();}
+    else if(rvExtra.length>0){document.getElementById('ov-extra').style.display='flex';}
+    else{setCompleted(rvIdx,rvDidExtra?'trophy':'badge');}
+  }
+}
+
+function closeWriting(){
+  document.getElementById('ov-writing').style.display='none';
+  rvAnswered=false;
+  // 2단계: 10칸 공책을 다 쓴 후 다음 문제로 진행
+  if(document.getElementById('s-s2quiz').classList.contains('active')){
+    s2answered=false;
+    s2Rethought=false;
+    if(s2pos+1<s2queue.length){s2pos++;if(!isRetry)s2hintVisible=false;document.getElementById("s2-rethink-tag").style.display="none";renderS2();}
+    else{
+      if(isRetry) retryCompleted=true;
+      renderS2Result();goTo('s-s2result');
+    }
+    return;
+  }
+  const[b1,b2]=[document.getElementById('rv-btn1'),document.getElementById('rv-btn2')];
+  [b1,b2].forEach(b=>{b.disabled=false;b.style.opacity='1';});
+}
+
+function doExtra(){
+  document.getElementById('ov-extra').style.display='none';
+  rvDidExtra=true;rvQueue=rvExtra;rvExtra=[];rvPos=0;rvSubStep='picture';rvAnswered=false;
+  renderReview();
+}
+function skipExtra(){
+  document.getElementById('ov-extra').style.display='none';
+  setCompleted(rvIdx,'badge');
+}
+function setCompleted(idx,type){
+  completed[idx]=type;saveProgress();renderBingo();goTo('s-bingo');
+}
+
+/* ══════════════════════════════════════
+   2단계: GAS getAllQuizData 사용
+══════════════════════════════════════ */
+function setProbCount(n){
+  _probCount=n;
+  document.querySelectorAll('.prob-btn').forEach((b,i)=>{
+    const counts=[3,5,10];const sel=counts[i]===n;
+    b.style.background=sel?'#FF7000':'#FFF7ED';b.style.color=sel?'white':'#FF7000';
+  });
+}
+
+function initS2(retryQueue=null){
+  s2pos=0;s2answered=false;s2hintVisible=false;s2Rethought=false;retryCompleted=false;
+  if(retryQueue){
+    if(retryQueue.length===0){goTo('s-s2result');return;}
+    s2queue=retryQueue;isRetry=true;s2hintVisible=true;
+    document.getElementById('s2-retry-tag').style.display='inline-block';
+    renderS2();goTo('s-s2quiz'); return;
+  }
+  isRetry=false;s2results=[];
+  document.getElementById('s2-retry-tag').style.display='none';
+
+  const hasUrl=!!getExecUrl();
+  if(hasUrl){
+    // 로딩 중 표시
+    goTo('s-s2quiz');
+    document.getElementById('s2-sentence').textContent='문제 불러오는 중...';
+    [document.getElementById('s2-btn1'),document.getElementById('s2-btn2')].forEach(b=>{b.disabled=true;b.textContent='…';});
+
+    _callApi('getAllQuizData','',function(allQuizzes){
+      const filtered=allQuizzes.filter(q=>!q.isExtra);
+      const seen=new Set();
+      s2queue=shuffle(filtered).filter(q=>{
+        const k=q.pair+'|'+q.word;
+        if(seen.has(k))return false;seen.add(k);return true;
+      }).slice(0,Math.min(_probCount,filtered.length));
+      s2queue=s2queue.map(q=>({
+        ...q,
+        wd:{pair:q.pair,w1:q.word1,w2:q.word2,m1:q.meaning1,m2:q.meaning2,n1:q.note1,n2:q.note2}
+      }));
+      renderS2();
+    },function(e){
+      console.error('퀴즈 로드 오류',e);
+      document.getElementById('s2-sentence').textContent='데이터 로드 오류. 새로고침해 주세요.';
+    });
+  } else {
+    // 오프라인 폴백
+    s2queue=shuffle(ALL.filter(w=>w.q&&w.q.length>0).map(w=>({
+      pair:w.pair,word:w.w1,ex:'예시 문장입니다.',bogie:w.w1+'/'+w.w2,
+      meaning1:w.m1,meaning2:w.m2,note1:'',note2:'',url:'',
+      wd:w
+    }))).slice(0,_probCount);
+    // wd 없는 경우 채우기
+    s2queue=ALL.slice(0,_probCount).map((w,i)=>({
+      pair:w.pair,word:w.w1,ex:'문제 '+( i+1)+' 예시 문장.',bogie:w.w1+'/'+w.w2,
+      meaning1:w.m1,meaning2:w.m2,note1:'',note2:'',url:'',isExtra:false,
+      wd:{pair:w.pair,w1:w.w1,w2:w.w2,m1:w.m1,m2:w.m2,n1:'',n2:''}
+    }));
+    renderS2();goTo('s-s2quiz');
+  }
+}
+
+function renderS2(){
+  const q=s2queue[s2pos];if(!q)return;
+  document.getElementById('s2-counter-tag').textContent='문제 '+(s2pos+1)+'/'+s2queue.length;
+  document.getElementById('s2-pair-title').textContent=q.wd?q.wd.pair:(q.pair||'');
+
+  // 빈칸 문장: bogie 있으면 정답 활용형으로, 없으면 기본형
+  const correctWord=q.word||q.w||(q.wd?q.wd.w1:'');
+  document.getElementById('s2-sentence').innerHTML=formatSentence(q.ex,correctWord);
+
+  // 힌트 이미지 (s2hintVisible=true이면 좌측에 표시)
+  const hint=document.getElementById('s2-hint-box');
+  if(s2hintVisible){
+    hint.style.display='flex';
+    if(q.url){
+      hint.innerHTML=`<img src="${q.url}" style="width:100%;height:100%;object-fit:contain;padding:1vmin" alt="힌트" onerror="this.parentElement.innerHTML='<div style=\\'font-size:6vmin;color:#D1D5DB\\'>🖼️</div><div style=\\'font-size:2.5vmin;color:#F97316;margin-top:1vmin\\'>그림이 표시됩니다</div>'">`;
+    } else {
+      hint.innerHTML='<div style="font-size:6vmin;color:#D1D5DB">🖼️</div><div style="font-size:2.5vmin;color:#F97316;background:#FFF7ED;border-radius:1vmin;padding:.6vmin 1.5vmin;border:1px solid #FED7AA;margin-top:1vmin">실제 앱에서 그림이 표시됩니다</div>';
+    }
+  } else {
+    hint.style.display='none';
+  }
+
+  // 버튼: bogie 사용 - [w1형, w2형] 순서
+  const wd=q.wd||{w1:q.word1,w2:q.word2};
+  const labels=getBogieLabels(q.bogie, q.word||q.w, wd.w1, wd.w2);
+  const[b1,b2]=[document.getElementById('s2-btn1'),document.getElementById('s2-btn2')];
+  b1.textContent=labels[0];b2.textContent=labels[1];
+  applyBtnColors(b1,b2);
+}
+
+function checkS2(btnIdx){
+  if(s2answered)return;
+  const q=s2queue[s2pos];const wd=q.wd;
+
+  // 정답 기본형 (trim으로 공백 제거)
+  const correctWord=(q.word||q.w||'').trim();
+  // 정답이 w1인지 w2인지 판별
+  const correctIsW1=(correctWord===wd.w1.trim());
+  // 누른 버튼이 w1(0번)인지 w2(1번)인지
+  const chosenIsW1=(btnIdx===0);
+  const ok=(chosenIsW1===correctIsW1);
+
+  s2answered=true;
+  s2LastOk=ok;  // 현재 선택의 정답 여부 (afterFeedback에서 사용)
+  [document.getElementById('s2-btn1'),document.getElementById('s2-btn2')].forEach(b=>{b.disabled=true;b.style.opacity='.4';});
+
+  // 결과 기록: 첫 시도(다시 생각 전, 힌트 없음)만 기록. retry/rethink는 기록 안 함
+  if(!isRetry&&!s2hintVisible&&!s2Rethought){
+    s2results.push({pair:wd.pair,w:correctWord,correct:ok,q});
+  }
+  // ※ isRetry일 때 r.correct를 true로 바꾸지 않음 → 틀린 문제는 항상 "다시 푼 문제"로 유지
+
+  ok?playChime():playWrong();
+  const m_correct=correctIsW1?wd.m1:wd.m2;
+  const wrongWord =correctIsW1?wd.w2:wd.w1;
+  const m_wrong   =correctIsW1?wd.m2:wd.m1;
+  let fb='';
+  if(ok){fb=correctWord+': '+m_correct;}
+  else{fb='❌ '+wrongWord+': '+m_wrong+'\n⭕ '+correctWord+': '+m_correct;}
+  showFeedback(ok,wd,q,fb,true,correctIsW1);
+}
+
+function renderS2Result(){
+  const name=userName.includes('. ')?userName.split('. ').slice(1).join('. '):userName;
+  const correct=s2results.filter(r=>r.correct);
+  const wrong=s2results.filter(r=>!r.correct);
+
+  // 제목, 이름, 날짜
+  document.getElementById('result-title').textContent='['+name+'] 학습 결과 보고서';
+  document.getElementById('result-name').textContent=name;
+  document.getElementById('result-date').textContent=
+    new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+
+  // 낱말 쌍 칩 스타일
+  const chip=(pair,color)=>`<span style="background:white;border:1.5px solid ${color};border-radius:1.2vmin;padding:1vmin 2vmin;font-size:3vmin;color:#374151;font-weight:700;display:inline-block">${pair}</span>`;
+
+  document.getElementById('s2-correct-list').innerHTML=
+    correct.length
+      ? correct.map(r=>chip(r.pair,'#BBF7D0')).join('')
+      : '<span style="font-size:3vmin;color:#9CA3AF;font-style:italic">아직 맞힌 문제가 없어요.</span>';
+
+  document.getElementById('s2-wrong-list').innerHTML=
+    wrong.length
+      ? wrong.map(r=>chip(r.pair,'#FECDD3')).join('')
+      : '<span style="font-size:3vmin;font-weight:700;color:#9CA3AF">모두 한 번에 잘 맞혔어요! 👍</span>';
+
+  // 버튼 잠금: 틀린 문제가 있고 아직 재도전 안 했으면 잠금
+  const hasWrong=wrong.length>0;
+  const locked=hasWrong&&!retryCompleted;
+  const notice=document.getElementById('result-notice');
+  const btnHome=document.getElementById('btn-home');
+  const btnRestart=document.getElementById('btn-restart');
+  const btnRetry=document.getElementById('btn-retry');
+
+  if(locked){
+    notice.style.display='block';
+    btnRetry.style.display='block';
+    setBtnLocked(btnHome, true);
+    setBtnLocked(btnRestart, true);
+  } else {
+    notice.style.display='none';
+    btnRetry.style.display='none';
+    setBtnLocked(btnHome, false);
+    setBtnLocked(btnRestart, false);
+  }
+}
+
+// 버튼 잠금/해제 처리
+function setBtnLocked(btn, locked){
+  if(locked){
+    btn.disabled=true;
+    btn.style.opacity='0.4';
+    btn.style.cursor='not-allowed';
+    btn.style.filter='grayscale(0.6)';
+    btn.style.whiteSpace='nowrap';
+    if(!btn.dataset.origText) btn.dataset.origText=btn.textContent;
+    // 앞쪽 이모지·공백 모두 제거 후 자물쇠 추가
+    const clean=btn.dataset.origText.replace(/^[\s\S]*?\s(?=[가-힣a-zA-Z])/,'').trim();
+    btn.textContent='🔒 '+clean;
+  } else {
+    btn.disabled=false;
+    btn.style.opacity='1';
+    btn.style.cursor='pointer';
+    btn.style.filter='none';
+    btn.style.whiteSpace='nowrap';
+    if(btn.dataset.origText) btn.textContent=btn.dataset.origText;
+  }
+}
+
+// 메인 메뉴 이동 (잠금 체크)
+function goHome(){
+  const wrong=s2results.filter(r=>!r.correct);
+  if(wrong.length>0&&!retryCompleted){
+    alert('틀린 문제를 먼저 다시 풀어 주세요!');
+    return;
+  }
+  goTo('s-mode');
+}
+
+function restartS2(){
+  const wrong=s2results.filter(r=>!r.correct);
+  if(wrong.length>0&&!retryCompleted){
+    alert('틀린 문제를 먼저 다시 풀어 주세요!');
+    return;
+  }
+  retryCompleted=false;
+  initS2();
+}
+
+function retryWrong(){
+  const wrong=s2results.filter(r=>!r.correct);if(!wrong.length)return;
+  initS2(wrong.map(r=>s2queue.find(q=>(q.wd?q.wd.pair:q.pair)===r.pair&&(q.word||q.w)===r.w)).filter(Boolean));
+}
+
+/* 앱 시작 */
+setProbCount(3);
+initApp();
+</script>
+<script>
+/* 체험 모드 안내 배너 (전 앱 일관) */
+(function(){
+  function isDemo(){
+    try{
+      if(/[#&]c=/.test(location.hash||'')) return false;
+      for(var j=0;j<localStorage.length;j++){ var k=localStorage.key(j)||''; if(/exec|gasurl|serverurl|sheet_api|gas_exec|appserverurl/i.test(k) && localStorage.getItem(k)) return false; }
+      return true;
+    }catch(e){ return true; }
+  }
+  function show(){
+    if(document.getElementById('__demoBar')) return;
+    if(!isDemo()) return;
+    var bar=document.createElement('div'); bar.id='__demoBar';
+    bar.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:2147483000;background:#1f2937;color:#fff;font-size:13px;line-height:1.45;padding:9px 38px calc(9px + env(safe-area-inset-bottom)) 14px;text-align:center;font-family:sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.25);';
+    bar.innerHTML='체험 모드예요 · 활동 기록은 이 기기에만 저장돼요(이어하기 가능). 선생님이 구글 시트를 연결하면 시트에 저장됩니다.';
+    var x=document.createElement('button'); x.textContent='\u2715';
+    x.style.cssText='position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#fff;font-size:16px;cursor:pointer;';
+    x.onclick=function(){ var b=document.getElementById('__demoBar'); if(b) b.remove(); };
+    bar.appendChild(x); document.body.appendChild(bar);
+  }
+  if(document.readyState==='loading') addEventListener('DOMContentLoaded',show); else show();
+  addEventListener('load',show);
+})();
+</script>
+</body>
+</html>
