@@ -24,9 +24,12 @@ html,body{
 .screen{
   display:none;width:100vw;height:100vh;
   flex-direction:column;align-items:center;justify-content:center;
-  overflow:hidden;
+  overflow-y:auto;overflow-x:hidden;
 }
 .screen.active{display:flex}
+/* 내용이 화면보다 길면 위에서부터 스크롤(가운데 정렬 때문에 위가 잘리는 것 방지) */
+@media (max-height:700px){ .screen{ justify-content:flex-start; padding:2vh 0; } }
+#teacher-panel{ max-height:78vh; overflow-y:auto; }
 
 /* ── 공통 ── */
 button{font-family:'Jua',sans-serif;cursor:pointer;border:none;transition:transform .15s}
@@ -478,12 +481,11 @@ var DEMO_DATA={"imgMap":{"2_8":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABA
 
 
 function _initExecUrl() {
-  // ① 학생용 링크: #c=<exec주소>
+  // ① 학생용 링크: #c=<exec주소>  (이 접속에만 사용, localStorage에 저장하지 않음)
   const hash = location.hash || '';
   const m = hash.match(/[#&]c=([^&]+)/);
   if (m) {
     _execUrl = decodeURIComponent(m[1]);
-    localStorage.setItem('execUrl', _execUrl);
     // 학생용 접속: 선생님 버튼 숨김
     const tb = document.getElementById('teacher-btn-wrap');
     if (tb) tb.style.display = 'none';
