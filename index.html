@@ -593,6 +593,8 @@ function initApp(){
     ];
     ALL=[...WORDS,...BONUS];
     wordData=ALL.map(w=>({rowIndex:w.rowIndex,pair:w.pair,word1:w.w1,word2:w.w2,meaning1:w.m1,meaning2:w.m2,note1:'',note2:''}));
+    var _selName=document.getElementById('sel-name');
+    if(_selName) _selName.innerHTML='<option value="">-- 이름 선택 --</option>';
     Array.from({length:30},function(_,i){return (i+1)+' 학생'+(i+1);}).forEach(function(s){
       const opt=document.createElement('option');opt.value=s;opt.textContent=s;
       document.getElementById('sel-name').appendChild(opt);
