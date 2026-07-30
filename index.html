@@ -460,6 +460,21 @@ select{font-family:'Jua',sans-serif}
 ══════════════════════════════════════ */
 let _execUrl = '';
 
+// 전역 상태 (선언 안 하면 데모 모드에서 참조 오류가 남)
+var completed = completed || {};
+var userName = (typeof userName !== 'undefined') ? userName : '';
+var stage1Results = (typeof stage1Results !== 'undefined') ? stage1Results : [];
+var wordData = (typeof wordData !== 'undefined') ? wordData : [];
+var WORDS = (typeof WORDS !== 'undefined') ? WORDS : [];
+var BONUS = (typeof BONUS !== 'undefined') ? BONUS : [];
+var ALL = (typeof ALL !== 'undefined') ? ALL : [];
+var isMuted = (typeof isMuted !== 'undefined') ? isMuted : false;
+var recordedSessions = (typeof recordedSessions !== 'undefined') ? recordedSessions : new Set();
+var s2queue = (typeof s2queue !== 'undefined') ? s2queue : [];
+var s2pos = (typeof s2pos !== 'undefined') ? s2pos : 0;
+var rvQueue = (typeof rvQueue !== 'undefined') ? rvQueue : [];
+var _probCount = (typeof _probCount !== 'undefined') ? _probCount : 5;
+
 function _initExecUrl() {
   // ① 학생용 링크: #c=<exec주소>
   const hash = location.hash || '';
@@ -595,7 +610,7 @@ function initApp(){
     wordData=ALL.map(w=>({rowIndex:w.rowIndex,pair:w.pair,word1:w.w1,word2:w.w2,meaning1:w.m1,meaning2:w.m2,note1:'',note2:''}));
     var _selName=document.getElementById('sel-name');
     if(_selName) _selName.innerHTML='<option value="">-- 이름 선택 --</option>';
-    Array.from({length:30},function(_,i){return (i+1)+' 학생'+(i+1);}).forEach(function(s){
+    Array.from({length:30},function(_,i){return (i+1)+'. 학생'+(i+1);}).forEach(function(s){
       const opt=document.createElement('option');opt.value=s;opt.textContent=s;
       document.getElementById('sel-name').appendChild(opt);
     });
@@ -927,7 +942,7 @@ function doLogin(){
   stage1Results=[];
   loadProgress();
   // 이름 파싱: "1. 홍길동" / "1 홍길동" / "1가 홍길동" 등 다양한 형식 지원
-  const nameOnly=userName.replace(/^\d+[가-힣\.\s]*\s*/, '').trim() || userName;
+  const nameOnly=userName.replace(/^\s*\d+\s*[.\)]?\s*/, '').trim() || userName;
   document.getElementById('mode-title').textContent=nameOnly+' 학생, 어떤 공부를 할까요?';
   renderBingo();
   goTo('s-mode');
